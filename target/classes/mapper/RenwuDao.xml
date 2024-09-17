@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.RenwuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jiaju_id as jiajuId
+        ,a.renwu_uuid_number as renwuUuidNumber
+        ,a.renwu_name as renwuName
+        ,a.renwu_content as renwuContent
+        ,a.zhixingzhuangtai_types as zhixingzhuangtaiTypes
+        ,a.renwuzhuangtai_types as renwuzhuangtaiTypes
+        ,a.renwu_delete as renwuDelete
+        ,a.zhixing_time as zhixingTime
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.RenwuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,jiaju.yonghu_id as jiajuYonghuId
+        ,jiaju.jiaju_uuid_number as jiajuUuidNumber
+        ,jiaju.jiaju_name as jiajuName
+        ,jiaju.jiaju_photo as jiajuPhoto
+        ,jiaju.jiaju_types as jiajuTypes
+        ,jiaju.quyu_types as quyuTypes
+        ,jiaju.jiaju_content as jiajuContent
+        ,jiaju.zhuangtai_types as zhuangtaiTypes
+        ,jiaju.jiaju_delete as jiajuDelete
+
+        FROM renwu  a
+        left JOIN jiaju jiaju ON a.jiaju_id = jiaju.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.jiajuId != null and params.jiajuId != ''">
+                and (
+                    a.jiaju_id = #{params.jiajuId}
+                )
+            </if>
+            <if test=" params.renwuUuidNumber != '' and params.renwuUuidNumber != null and params.renwuUuidNumber != 'null' ">
+                and a.renwu_uuid_number like CONCAT('%',#{params.renwuUuidNumber},'%')
+            </if>
+            <if test=" params.renwuName != '' and params.renwuName != null and params.renwuName != 'null' ">
+                and a.renwu_name like CONCAT('%',#{params.renwuName},'%')
+            </if>
+            <if test=" params.renwuContent != '' and params.renwuContent != null and params.renwuContent != 'null' ">
+                and a.renwu_content like CONCAT('%',#{params.renwuContent},'%')
+            </if>
+            <if test="params.zhixingzhuangtaiTypes != null and params.zhixingzhuangtaiTypes != ''">
+                and a.zhixingzhuangtai_types = #{params.zhixingzhuangtaiTypes}
+            </if>
+            <if test="params.renwuzhuangtaiTypes != null and params.renwuzhuangtaiTypes != ''">
+                and a.renwuzhuangtai_types = #{params.renwuzhuangtaiTypes}
+            </if>
+            <if test="params.renwuDeleteStart != null and params.renwuDeleteStart != ''">
+                <![CDATA[  and a.renwu_delete >= #{params.renwuDeleteStart}   ]]>
+            </if>
+            <if test="params.renwuDeleteEnd != null and params.renwuDeleteEnd != ''">
+                <![CDATA[  and a.renwu_delete <= #{params.renwuDeleteEnd}   ]]>
+            </if>
+             <if test="params.renwuDelete != null and params.renwuDelete != ''">
+                and a.renwu_delete = #{params.renwuDelete}
+             </if>
+            <if test=" params.zhixingTimeStart != '' and params.zhixingTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.zhixing_time) >= UNIX_TIMESTAMP(#{params.zhixingTimeStart}) ]]>
+            </if>
+            <if test=" params.zhixingTimeEnd != '' and params.zhixingTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.zhixing_time) <= UNIX_TIMESTAMP(#{params.zhixingTimeEnd}) ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断家具的id不为空 -->
+            <if test=" params.jiajuIdNotNull != '' and params.jiajuIdNotNull != null and params.jiajuIdNotNull != 'null' ">
+                and a.jiaju_id IS NOT NULL
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and jiaju.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.jiajuUuidNumber != '' and params.jiajuUuidNumber != null and params.jiajuUuidNumber != 'null' ">
+                and jiaju.jiaju_uuid_number like CONCAT('%',#{params.jiajuUuidNumber},'%')
+            </if>
+            <if test=" params.jiajuName != '' and params.jiajuName != null and params.jiajuName != 'null' ">
+                and jiaju.jiaju_name like CONCAT('%',#{params.jiajuName},'%')
+            </if>
+            <if test="params.jiajuTypes != null  and params.jiajuTypes != ''">
+                and jiaju.jiaju_types = #{params.jiajuTypes}
+            </if>
+
+            <if test="params.quyuTypes != null  and params.quyuTypes != ''">
+                and jiaju.quyu_types = #{params.quyuTypes}
+            </if>
+
+            <if test=" params.jiajuContent != '' and params.jiajuContent != null and params.jiajuContent != 'null' ">
+                and jiaju.jiaju_content like CONCAT('%',#{params.jiajuContent},'%')
+            </if>
+            <if test="params.zhuangtaiTypes != null  and params.zhuangtaiTypes != ''">
+                and jiaju.zhuangtai_types = #{params.zhuangtaiTypes}
+            </if>
+
+            <if test="params.jiajuDeleteStart != null  and params.jiajuDeleteStart != '' ">
+                <![CDATA[  and jiaju.jiaju_delete >= #{params.jiajuDeleteStart}   ]]>
+            </if>
+            <if test="params.jiajuDeleteEnd != null  and params.jiajuDeleteEnd != '' ">
+                <![CDATA[  and jiaju.jiaju_delete <= #{params.jiajuDeleteEnd}   ]]>
+            </if>
+            <if test="params.jiajuDelete != null  and params.jiajuDelete != '' ">
+                and jiaju.jiaju_delete = #{params.jiajuDelete}
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
